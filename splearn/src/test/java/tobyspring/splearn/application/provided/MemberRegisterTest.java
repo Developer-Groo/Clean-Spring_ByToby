@@ -1,5 +1,6 @@
 package tobyspring.splearn.application.provided;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
@@ -8,12 +9,13 @@ import org.springframework.context.annotation.Import;
 import tobyspring.splearn.SplearnTestConfiguration;
 import tobyspring.splearn.domain.*;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
 @Import(SplearnTestConfiguration.class)
-record MemberRegisterTest(MemberRegister memberRegister) {
+record MemberRegisterTest(MemberRegister memberRegister, EntityManager entityManager) {
 
     @Test
     void register() {
@@ -36,14 +38,29 @@ record MemberRegisterTest(MemberRegister memberRegister) {
     }
 
     @Test
-    void memberRegisterRequestFail() {
-        // when & then
-        extracted(new MemberRegisterRequest("splearn@gmail.com", "name", "password"));
-        extracted(new MemberRegisterRequest("splearn@gmail.com", "nicknames__________________________", "password"));
-        extracted(new MemberRegisterRequest("splearngmail.com", "nickname", "password"));
+    void activate() {
+        // given
+        Member member = memberRegister.register(MemberFixture.createMemberRegisterRequest());
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        member = memberRegister.activate(member.getId());
+        entityManager.flush();
+
+        // then
+        assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
     }
 
-    private void extracted(MemberRegisterRequest invalid) {
+    @Test
+    void memberRegisterRequestFail() {
+        // when & then
+        checkValidation(new MemberRegisterRequest("splearn@gmail.com", "name", "password"));
+        checkValidation(new MemberRegisterRequest("splearn@gmail.com", "nicknames__________________________", "password"));
+        checkValidation(new MemberRegisterRequest("splearngmail.com", "nickname", "password"));
+    }
+
+    private void checkValidation(MemberRegisterRequest invalid) {
         assertThatThrownBy(() -> memberRegister.register(invalid))
                 .isInstanceOf(ConstraintViolationException.class);
     }
