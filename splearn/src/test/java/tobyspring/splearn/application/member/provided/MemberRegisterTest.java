@@ -40,9 +40,7 @@ record MemberRegisterTest(MemberRegister memberRegister, EntityManager entityMan
     @Test
     void activate() {
         // given
-        Member member = memberRegister.register(MemberFixture.createMemberRegisterRequest());
-        entityManager.flush();
-        entityManager.clear();
+        Member member = registerMember();
 
         // when
         member = memberRegister.activate(member.getId());
@@ -50,6 +48,34 @@ record MemberRegisterTest(MemberRegister memberRegister, EntityManager entityMan
 
         // then
         assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
+        assertThat(member.getDetail().getActivatedAt()).isNotNull();
+    }
+
+    @Test
+    void deactivate() {
+        Member member = registerMember();
+
+        memberRegister.activate(member.getId());
+        entityManager.flush();
+        entityManager.clear();
+
+        member = memberRegister.deactivate(member.getId());
+
+        assertThat(member.getStatus()).isEqualTo(MemberStatus.DEACTIVATED);
+        assertThat(member.getDetail().getDeactivatedAt()).isNotNull();
+    }
+
+    @Test
+    void updateInfo() {
+        Member member = registerMember();
+
+        memberRegister.activate(member.getId());
+        entityManager.flush();
+        entityManager.clear();
+
+        member = memberRegister.updateInfo(member.getId(), new MemberInfoUpdateRequest("Toby123", "toby100", "자기소개"));
+
+        assertThat(member.getDetail().getProfile().address()).isEqualTo("toby100");
     }
 
     @Test
@@ -58,6 +84,13 @@ record MemberRegisterTest(MemberRegister memberRegister, EntityManager entityMan
         checkValidation(new MemberRegisterRequest("splearn@gmail.com", "name", "password"));
         checkValidation(new MemberRegisterRequest("splearn@gmail.com", "nicknames__________________________", "password"));
         checkValidation(new MemberRegisterRequest("splearngmail.com", "nickname", "password"));
+    }
+
+    private Member registerMember() {
+        Member member = memberRegister.register(MemberFixture.createMemberRegisterRequest());
+        entityManager.flush();
+        entityManager.clear();
+        return member;
     }
 
     private void checkValidation(MemberRegisterRequest invalid) {
