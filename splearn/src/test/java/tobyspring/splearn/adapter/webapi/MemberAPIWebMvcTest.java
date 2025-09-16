@@ -14,14 +14,14 @@ import tobyspring.splearn.domain.member.Member;
 import tobyspring.splearn.domain.member.MemberFixture;
 import tobyspring.splearn.domain.member.MemberRegisterRequest;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @WebMvcTest(MemberAPI.class)
 @RequiredArgsConstructor
-class MemberAPITest {
+class MemberAPIWebMvcTest {
 
     private final MockMvcTester mvcTester;
     private final ObjectMapper objectMapper;
