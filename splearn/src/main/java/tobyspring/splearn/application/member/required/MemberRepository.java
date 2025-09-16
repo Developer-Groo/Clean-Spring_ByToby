@@ -1,11 +1,10 @@
 package tobyspring.splearn.application.member.required;
 
-import com.fasterxml.jackson.databind.introspect.AnnotationCollector;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
+import tobyspring.splearn.domain.member.Member;
 import tobyspring.splearn.domain.member.Profile;
 import tobyspring.splearn.domain.shared.Email;
-import tobyspring.splearn.domain.member.Member;
 
 import java.util.Optional;
 

@@ -9,8 +9,8 @@ import tobyspring.splearn.domain.AbstractEntity;
 
 import java.time.LocalDateTime;
 
-import static java.util.Objects.*;
-import static org.springframework.util.Assert.*;
+import static java.util.Objects.requireNonNull;
+import static org.springframework.util.Assert.isTrue;
 
 @Entity
 @Getter
